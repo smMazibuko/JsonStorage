@@ -10,7 +10,7 @@ namespace JsonStorage.Controllers
 
         public readonly string filePath = "./Data/storage.json";
 
-        public List<Item> returnList(string filePath)
+        public List<Item> DeserializeList(string filePath)
         {
 
             string jsonData = System.IO.File.ReadAllText(filePath);
@@ -26,7 +26,7 @@ namespace JsonStorage.Controllers
         public ActionResult Index()
         {
 
-            var items = returnList(filePath);
+            var items = DeserializeList(filePath);
 
             return View(items);
         }
@@ -35,7 +35,7 @@ namespace JsonStorage.Controllers
         public ActionResult Details(int id)
         {
             
-            var items = returnList(filePath);
+            var items = DeserializeList(filePath);
 
             var item = items[id - 1]; // to get the correct index
 
@@ -56,7 +56,8 @@ namespace JsonStorage.Controllers
             try
             {
                 // Retrieves list and adds latest item
-                var items = returnList(filePath);
+                var items = DeserializeList(filePath);
+                item.Id = items.Count + 1;
                 items.Add(item);
 
                 // Serializes new list and wites it into the json file
