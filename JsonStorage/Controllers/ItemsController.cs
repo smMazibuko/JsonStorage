@@ -7,16 +7,26 @@ namespace JsonStorage.Controllers
 {
     public class ItemsController : Controller
     {
-        // GET: ItemsController
-        public ActionResult Index()
+
+        public readonly string filePath = "./Data/storage.json";
+
+        public List<Item> returnList(string filePath)
         {
 
-            string jsonData = System.IO.File.ReadAllText("./Data/storage.json");
+            string jsonData = System.IO.File.ReadAllText(filePath);
             var options = new JsonSerializerOptions
             {
                 PropertyNameCaseInsensitive = true
             };
-            var items = JsonSerializer.Deserialize<List<Item>>(jsonData, options);
+            return JsonSerializer.Deserialize<List<Item>>(jsonData, options) ?? new List<Item>();
+
+        }
+        
+        // GET: ItemsController
+        public ActionResult Index()
+        {
+
+            var items = returnList(filePath);
 
             return View(items);
         }
@@ -24,7 +34,12 @@ namespace JsonStorage.Controllers
         // GET: ItemsController/Details/5
         public ActionResult Details(int id)
         {
-            return View();
+            
+            var items = returnList(filePath);
+
+            var item = items[id - 1]; // to get the correct index
+
+            return View(item);
         }
 
         // GET: ItemsController/Create
@@ -40,18 +55,18 @@ namespace JsonStorage.Controllers
         {
             try
             {
-                string jsonData = System.IO.File.ReadAllText("./Data/storage.json");
-                var options = new JsonSerializerOptions
-                {
-                    WriteIndented = true,
-                    PropertyNameCaseInsensitive = true
-                };
-                var items = JsonSerializer.Deserialize<List<Item>>(jsonData, options) ?? new List<Item>();
-
+                // Retrieves list and adds latest item
+                var items = returnList(filePath);
                 items.Add(item);
 
-                jsonData = JsonSerializer.Serialize(items, options);
-                System.IO.File.WriteAllText("./Data/storage.json", jsonData);
+                // Serializes new list and wites it into the json file
+                var options = new JsonSerializerOptions
+                {
+                    PropertyNameCaseInsensitive = true,
+                    WriteIndented = true
+                };
+                var jsonData = JsonSerializer.Serialize(items, options);
+                System.IO.File.WriteAllText(filePath, jsonData);
 
                 return RedirectToAction(nameof(Index));
             }
